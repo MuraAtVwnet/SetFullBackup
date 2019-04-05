@@ -522,6 +522,8 @@ echo "[INFO] Backup options : $Options"
 
 $CommandLine = "WBADMIN ENABLE BACKUP " + $Options
 
+echo "Cooand line : $CommandLine"
+
 # バックアップ設定
 cmd /c $CommandLine
 
