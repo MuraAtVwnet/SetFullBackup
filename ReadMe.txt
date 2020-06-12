@@ -1,9 +1,10 @@
 ﻿■ これは何?
-wbadmin.exe を使ってフルバックアップを設定します
+wbadmin.exe を使ってフルバックアップをスケジューリングします
+即時バックアップも可能です
 Windows 8 / Windows Server 2012 以降をサポートしています。
 
 ■ 使い方
-.\SetWbadminFullBackup.ps1 -BackupTerget バックアップ先 -BackupTime バックアップ開始時刻
+.\SetWbadminFullBackup.ps1 -BackupTerget バックアップ先 [-BackupTime バックアップ開始時刻] [-Now]
 
 ■ バックアップ先
 ・ドライブ	E:
@@ -25,6 +26,10 @@ Windows 8 / Windows Server 2012 以降をサポートしています。
 
 バックアップ停止(時刻に 99:99 を指定する)
 .\SetWbadminFullBackup.ps1 -BackupTerget 7 -BackupTime 99:99
+
+E ドライブに即時フルバックアップをする(Server / Client OS両方に対応)
+.\SetWbadminFullBackup.ps1 -BackupTerget E: -Now
+
 
 ■ Web Site
 http://www.vwnet.jp/Windows/PowerShell/wbadmin_FullBackup.htm

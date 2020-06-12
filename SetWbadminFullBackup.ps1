@@ -1,11 +1,12 @@
 ﻿<#
 .SYNOPSIS
-wbadmin.exe を使ってフルバックアップを設定します
+wbadmin.exe を使ってフルバックアップをスケジュールします
+即時バックアップも可能です
 
 .DESCRIPTION
 バックアップ先と開始時刻を指定してフルバックアップをを設定します
 Windows Server / Windows Client OS の両方に対応しています
-ローカルディスク/専用ディスク(Windows Server 専用)/リモーりもーも共有が指定できます
+ローカルディスク/専用ディスク(Windows Server 専用)/リモート共有が指定できます
 
 .EXAMPLE
 12:00 に E ドライブにフルバックアップをする(Server / Client OS両方に対応)
@@ -25,6 +26,10 @@ SetWbadminFullBackup.ps1 -BackupTerget 7 -BackupTime 12:00
 バックアップ停止(時刻に 99:99 を指定する)
 SetWbadminFullBackup.ps1 -BackupTerget 7 -BackupTime 99:99
 
+.EXAMPLE
+E ドライブに即時フルバックアップをする(Server / Client OS両方に対応)
+SetWbadminFullBackup.ps1 -BackupTerget E: -Now
+
 .PARAMETER BackupTerget
 ドライブ指定 : E:
 共有指定 : \\FileServer\ShareName
@@ -35,6 +40,10 @@ SetWbadminFullBackup.ps1 -BackupTerget 7 -BackupTime 99:99
 HH:MM
 24時間制で記述
 99:99 を指定するとバックアップ停止
+
+.PARAMETER Now
+即時バックアップ
+時刻指定は無視されます
 
 <CommonParameters> はサポートしていません
 
@@ -58,7 +67,8 @@ http://www.vwnet.jp/Windows/PowerShell/wbadmin_FullBackup.htm
 #################################################################################
 param (
 		[string]$BackupTerget,	# バックアップ先
-		[string]$BackupTime		# バックアップ開始時刻
+		[string]$BackupTime,	# バックアップ開始時刻
+		[switch]$Now			# 即時バックアップ
 		)
 
 $G_ScriptDir = Split-Path $MyInvocation.MyCommand.Path -Parent
@@ -406,7 +416,11 @@ CheckOSVertion
 $IsServerOS = InstallWindowsServerBackup
 
 ### -schedule:
-$BackupTime = SetStartTime $BackupTime
+
+# 即時バックアップの時はスキップ
+if( $Now -eq $false ){
+	$BackupTime = SetStartTime $BackupTime
+}
 
 ### バックアップ先に専用ディスクを指定
 if( $BackupTerget -match "^[0-9]+$" ){
@@ -499,11 +513,23 @@ if( $IsServerOS ){
 }
 
 # バックアップオプションを作る
-if( $IsServerOS ){
-	$Options = "-addtarget:$BackupTerget -include:$BackupVolumes -allCritical -systemState -vssFull -schedule:$BackupTime -quiet"
+if( $Now ){
+	# 即時バックアップ
+	if( $IsServerOS ){
+		$Options = "-addtarget:$BackupTerget -include:$BackupVolumes -allCritical -systemState -vssFull -quiet"
+	}
+	else{
+		$Options = "-addtarget:$BackupTerget -include:$BackupVolumes -allCritical -vssFull -quiet"
+	}
 }
 else{
-	$Options = "-addtarget:$BackupTerget -include:$BackupVolumes -allCritical -vssFull -schedule:$BackupTime -quiet"
+	# バックアップスケジュール
+	if( $IsServerOS ){
+		$Options = "-backupTarget:$BackupTerget -include:$BackupVolumes -allCritical -systemState -vssFull -schedule:$BackupTime -quiet"
+	}
+	else{
+		$Options = "-backupTarget:$BackupTerget -include:$BackupVolumes -allCritical -vssFull -schedule:$BackupTime -quiet"
+	}
 }
 
 # VM が入っていたら VM バックアップ
