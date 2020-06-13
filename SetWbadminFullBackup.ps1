@@ -546,7 +546,12 @@ if( $Credential -ne $null ){
 
 echo "[INFO] Backup options : $Options"
 
-$CommandLine = "WBADMIN ENABLE BACKUP " + $Options
+if( $Now ){
+	$CommandLine = "WBADMIN START BACKUP " + $Options
+}
+else{
+	$CommandLine = "WBADMIN ENABLE BACKUP " + $Options
+}
 
 echo "Cooand line : $CommandLine"
 
