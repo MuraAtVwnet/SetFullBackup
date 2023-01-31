@@ -68,7 +68,8 @@ http://www.vwnet.jp/Windows/PowerShell/wbadmin_FullBackup.htm
 param (
 		[string]$BackupTerget,	# バックアップ先
 		[string]$BackupTime,	# バックアップ開始時刻
-		[switch]$Now			# 即時バックアップ
+		[switch]$Now,			# 即時バックアップ
+		[switch]$WhatIf			# 動作テスト
 		)
 
 $G_ScriptDir = Split-Path $MyInvocation.MyCommand.Path -Parent
@@ -555,7 +556,9 @@ else{
 
 echo "Cooand line : $CommandLine"
 
-# バックアップ設定
-cmd /c $CommandLine
+if( -not $WhatIf ){
+	# バックアップ設定
+	cmd /c $CommandLine
+}
 
 echo "[INFO] バックアップ登録完了"
